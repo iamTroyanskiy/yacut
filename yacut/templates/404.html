@@ -1,0 +1,15 @@
+{% extends "base.html" %} {% block content %}
+<main>
+  <section class="container my-5 px-4">
+    <div class="row my-3">
+      <div class="col-12 col-lg-7 my-5">
+        <h1>Упс... 404! Ты не пройдёшь!</h1>
+        <p>Если тут что-то было, теперь этого тут нет.</p>
+        <p>
+          <a href="{{ url_for('index_view') }}">Вернуться на главную</a>
+        </p>
+      </div>
+    </div>
+  </section>
+</main>
+{% endblock %}

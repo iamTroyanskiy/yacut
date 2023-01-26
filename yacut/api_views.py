@@ -1,21 +1,22 @@
+from http import HTTPStatus
+
 from flask import request, jsonify
 
 from . import app, db
 from .api_validators import (
     required_fields_validator,
     original_url_validator,
-    short_url_validator
+    short_url_validator,
+    get_url_obj_validator,
+    get_data_in_request_validator,
 )
-from .error_handlers import InvalidAPIUsage
 from .models import URLMap
 from .utils import get_unique_short_id
 
 
 @app.route('/api/id/', methods=['POST'])
 def get_opinion():
-    data = request.get_json()
-    if data is None:
-        raise InvalidAPIUsage('Отсутствует тело запроса')
+    data = get_data_in_request_validator(request)
     required_fields_validator(data)
     original = data['url']
     original_url_validator(original)
@@ -36,16 +37,14 @@ def get_opinion():
         url=original,
         short_link=request.url_root + short
     )
-    return jsonify(output_data), 201
+    return jsonify(output_data), HTTPStatus.CREATED
 
 
 @app.route('/api/id/<short_id>/')
 def get_original_url(short_id):
-    url_obj = URLMap.query.filter_by(short=short_id).first()
-    if url_obj is None:
-        raise InvalidAPIUsage('Указанный id не найден', 404)
+    url_obj = get_url_obj_validator(short_id)
     url = url_obj.original
     output_data = dict(
         url=url
     )
-    return jsonify(output_data), 200
+    return jsonify(output_data), HTTPStatus.OK

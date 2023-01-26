@@ -1,4 +1,5 @@
 import re
+from http import HTTPStatus
 
 from yacut.error_handlers import InvalidAPIUsage
 from yacut.models import URLMap
@@ -30,3 +31,17 @@ def short_url_validator(value):
         raise InvalidAPIUsage('Указано недопустимое имя для короткой ссылки')
     if URLMap.query.filter_by(short=value).first() is not None:
         raise InvalidAPIUsage(f'Имя "{value}" уже занято.')
+
+
+def get_url_obj_validator(short_id):
+    url_obj = URLMap.query.filter_by(short=short_id).first()
+    if url_obj is None:
+        raise InvalidAPIUsage('Указанный id не найден', HTTPStatus.NOT_FOUND)
+    return url_obj
+
+
+def get_data_in_request_validator(request):
+    data = request.get_json()
+    if data is None:
+        raise InvalidAPIUsage('Отсутствует тело запроса')
+    return data

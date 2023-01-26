@@ -1,7 +1,7 @@
 import random
 import string
 
-from settings import MAX_URL_SIZE
+from .settings import MAX_URL_SIZE
 
 
 ALLOWED = string.ascii_letters + string.digits

@@ -1,4 +1,6 @@
-from flask import render_template, request, flash, redirect
+from flask import render_template, request, flash, redirect, abort
+from sqlalchemy import exc
+
 from . import app, db
 from .forms import URLForm
 from .models import URLMap
@@ -28,8 +30,11 @@ def index_post_view():
             url_obj = URLMap(
                 original=original_link
             )
-        db.session.add(url_obj)
-        db.session.commit()
+        try:
+            db.session.add(url_obj)
+            db.session.commit()
+        except exc.SQLAlchemyError as error:
+            abort(400, str(error))
         custom_url = request.url_root + url_obj.short
         return render_template('index.html', custom_url=custom_url, form=form)
     return render_template('index.html', form=form)

@@ -1,6 +1,7 @@
 from http import HTTPStatus
 
 from flask import request, jsonify
+from sqlalchemy import exc
 
 from . import app, db
 from .api_validators import (
@@ -10,6 +11,7 @@ from .api_validators import (
     get_url_obj_validator,
     get_data_in_request_validator,
 )
+from .error_handlers import InvalidAPIUsage
 from .models import URLMap
 from .utils import get_unique_short_id
 
@@ -31,8 +33,11 @@ def get_opinion():
     )
     url_obj = URLMap()
     url_obj.from_dict_api(data_for_model)
-    db.session.add(url_obj)
-    db.session.commit()
+    try:
+        db.session.add(url_obj)
+        db.session.commit()
+    except exc.SQLAlchemyError:
+        raise InvalidAPIUsage('Введены невалидные данные')
     output_data = dict(
         url=original,
         short_link=request.url_root + short
